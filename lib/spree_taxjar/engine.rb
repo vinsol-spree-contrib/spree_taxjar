@@ -1,6 +1,8 @@
 module SpreeTaxjar
   class Engine < Rails::Engine
     require 'spree/core'
+    require 'taxjar'
+
     isolate_namespace Spree
     engine_name 'spree_taxjar'
 
@@ -13,6 +15,10 @@ module SpreeTaxjar
       Dir.glob(File.join(File.dirname(__FILE__), '../../app/**/*_decorator*.rb')) do |c|
         Rails.configuration.cache_classes ? require(c) : load(c)
       end
+    end
+
+    initializer 'spree.register.calculators' do |app|
+      app.config.spree.calculators.tax_rates << Spree::Calculator::TaxjarCalculator
     end
 
     config.to_prepare &method(:activate).to_proc

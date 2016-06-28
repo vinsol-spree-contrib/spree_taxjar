@@ -1,0 +1,28 @@
+<%= render 'spree/admin/shared/sub_menu/configuration' %>
+
+<% content_for :page_title do %>
+  <%= Spree.t(:taxjar_settings) %>
+<% end %>
+
+<%= form_tag admin_taxjar_settings_path, method: :put do %>
+  <div id="preferences" data-hook>
+    <div class="row">
+      <div class="col-md-6">
+        <fieldset class="no-border-bottom">
+          <% @preferences_api.each do |key| %>
+              <div class="form-group">
+                <%= label_tag key %>
+                <%= preference_field_tag(key, Spree::Config[key], type: Spree::Config.preference_type(key)) %>
+              </div>
+          <% end %>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="form-buttons" data-hook="buttons">
+      <%= button Spree.t('actions.update'), 'refresh' %>
+      <span class="or"><%= Spree.t(:or) %></span>
+      <%= button_link_to Spree.t('actions.cancel'), admin_orders_url, icon: 'delete' %>
+    </div>
+  </div>
+<% end %>
