@@ -1,6 +1,7 @@
 en:
-  api_key_updated: Taxjar Api Key successfully updated
-  shipping_rate_exception_message: TaxJar cannot calculate inclusive sales taxes.
-  taxjar_api_key: Taxjar API Key
-  taxjar_calculator_description: Taxjar Calculator
-  taxjar_settings: Taxjar Settings
+  spree:
+    api_key_updated: Taxjar Api Key successfully updated
+    shipping_rate_exception_message: TaxJar cannot calculate inclusive sales taxes.
+    taxjar_api_key: Taxjar API Key
+    taxjar_calculator_description: Taxjar Calculator
+    taxjar_settings: Taxjar Settings

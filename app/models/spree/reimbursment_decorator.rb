@@ -1,4 +1,6 @@
 Spree::Reimbursement.class_eval do
+  include Taxable
+
   state_machine :reimbursement_status, initial: :pending do
     after_transition to: :reimbursed, do: :remove_tax_for_returned_items
     event :errored do
@@ -11,12 +13,8 @@ Spree::Reimbursement.class_eval do
   end
 
   def remove_tax_for_returned_items
-    return unless is_taxed_using_taxjar?
-    Spree::Taxjar.create_refund_transaction_for_order(self)
+    return unless taxjar_applicable?(order)
+    client = Spree::Taxjar.new(order, self)
+    client.create_refund_transaction_for_order
   end
-
-  private
-     def is_taxed_using_taxjar?
-      Spree::TaxRate.match(order.tax_zone).any? { |rate| rate.calculator_type == "Spree::Calculator::TaxjarCalculator" }
-    end
 end

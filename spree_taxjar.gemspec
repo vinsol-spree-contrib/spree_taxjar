@@ -3,12 +3,12 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_taxjar'
   s.version     = '3.1.0.rc3'
-  s.summary     = 'Add gem summary here'
-  s.description = 'Add (optional) gem description here'
+  s.summary     = 'Spree extension to calculate sales tax in states of USA'
+  s.description = 'Spree extension for providing Taxjar services in USA'
   s.required_ruby_version = '>= 2.1.0'
 
-  s.author    = 'You'
-  s.email     = 'you@example.com'
+  s.author    = 'Nimish Gupta'
+  s.email     = 'nimishg13@gmail.com'
   # s.homepage  = 'http://www.spreecommerce.com'
   s.license = 'BSD-3'
 
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.requirements << 'none'
 
   s.add_dependency 'spree_core', '~> 3.1.0.rc3'
-  s.add_dependency 'taxjar-ruby'
+  s.add_dependency 'taxjar-ruby', '~> 1.3.2'
 
   s.add_development_dependency 'capybara', '~> 2.6'
   s.add_development_dependency 'coffee-rails'

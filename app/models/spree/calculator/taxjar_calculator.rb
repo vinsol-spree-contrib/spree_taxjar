@@ -52,7 +52,7 @@ module Spree
         @amount_to_collect = Rails.cache.read(cache_key(order, item, ship_address))
 
         unless @amount_to_collect
-          taxjar_response = Spree::Taxjar.taxjar_client.tax_for_order(@parameters)
+          taxjar_response = Spree::Taxjar.new.calculate_tax_for_order(@parameters)
           Rails.cache.write(cache_key(order, item, ship_address), @amount_to_collect = taxjar_response['amount_to_collect'], expires_in: 10.minutes)
         end
 
