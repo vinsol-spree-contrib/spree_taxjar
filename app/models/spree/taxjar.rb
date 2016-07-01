@@ -66,10 +66,10 @@ module Spree
 
       def address_params
         {
-          to_country: @order.ship_address.country.iso,
-          to_zip: @order.ship_address.zipcode,
-          to_state: @order.ship_address.state.abbr,
-          to_city: @order.ship_address.city
+          to_country: @order.ship_country.iso,
+          to_zip: @order.ship_zipcode,
+          to_state: @order.ship_state.abbr,
+          to_city: @order.ship_city
         }
       end
 

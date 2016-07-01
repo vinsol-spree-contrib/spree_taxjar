@@ -1,6 +1,8 @@
 Spree::Order.class_eval do
   include Taxable
 
+  delegate :country, :zipcode, :state, :city, to: :ship_address, prefix: 'ship'
+
   state_machine.after_transition to: :complete, do: :capture_taxjar
   state_machine.after_transition to: :canceled, do: :delete_taxjar_transaction
 
