@@ -8,7 +8,9 @@ module Spree
     end
 
     def create_refund_transaction_for_order
-      @client.create_refund(refund_params)
+      if !(@client.list_refunds(from_transaction_date: Date.today - 1, to_transaction_date: Date.today + 1).include?(@reimbursement.number))
+        @client.create_refund(refund_params)
+      end
     end
 
     def create_transaction_for_order
