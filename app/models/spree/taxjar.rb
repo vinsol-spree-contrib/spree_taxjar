@@ -49,7 +49,7 @@ module Spree
           transaction_reference_id: @order.number,
           transaction_date: @order.completed_at.as_json,
           amount: @reimbursement.return_items.sum(:pre_tax_amount) + @order.shipment_total,
-          shipping: @order.shipment_total,
+          shipping: @order.shipment_total + @order.adjustment_total - @order.additional_tax_total,
           sales_tax: @reimbursement.return_items.sum(:additional_tax_total),
           line_items: return_items_params
         })
@@ -60,7 +60,7 @@ module Spree
           transaction_id: @order.number,
           transaction_date: @order.completed_at.as_json,
           amount: @order.total - @order.additional_tax_total,
-          shipping: @order.shipment_total,
+          shipping: @order.shipment_total + @order.adjustment_total - @order.additional_tax_total,
           sales_tax: @order.additional_tax_total,
           line_items: line_item_params
         })
