@@ -37,7 +37,7 @@ module Spree
           {
             quantity: return_items.length,
             product_identifier: item.variant.sku,
-            description: item.variant.description.truncate(150),
+            description: ActionView::Base.full_sanitizer.sanitize(item.variant.description).truncate(150),
             unit_price: item.pre_tax_amount
           }
         end
@@ -80,7 +80,7 @@ module Spree
           {
             quantity: item.quantity,
             product_identifier: item.sku,
-            description: item.description.truncate(150),
+            description: ActionView::Base.full_sanitizer.sanitize(item.description).truncate(150),
             unit_price: item.price,
             sales_tax: item.additional_tax_total
           }
