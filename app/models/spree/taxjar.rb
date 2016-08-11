@@ -8,17 +8,30 @@ module Spree
     end
 
     def create_refund_transaction_for_order
-      if !(@client.list_refunds(from_transaction_date: Date.today - 1, to_transaction_date: Date.today + 1).include?(@reimbursement.number))
+      if has_nexus? && !reimbursement_present?
         @client.create_refund(refund_params)
       end
     end
 
     def create_transaction_for_order
-      @client.create_order(transaction_parameters)
+      @client.create_order(transaction_parameters) if has_nexus?
     end
 
     def delete_transaction_for_order
-      @client.delete_order(@order.number)
+      @client.delete_order(@order.number) if has_nexus?
+    end
+
+    def has_nexus?
+      nexus_regions = @client.nexuses
+      if nexus_regions.present?
+        nexus_states(nexus_regions).include?(@order.ship_address.state.abbr)
+      else
+        false
+      end
+    end
+
+    def nexus_states(nexus_regions)
+      nexus_regions.map { |record| record[:region_code]}
     end
 
     def calculate_tax_for_order(options)
@@ -26,6 +39,10 @@ module Spree
     end
 
     private
+
+      def reimbursement_present?
+        @client.list_refunds(from_transaction_date: Date.today - 1, to_transaction_date: Date.today + 1).include?(@reimbursement.number)
+      end
 
       def group_by_line_items
         @reimbursement.return_items.group_by { |item| item.inventory_unit.line_item_id }
