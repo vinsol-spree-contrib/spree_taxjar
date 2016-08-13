@@ -5,16 +5,19 @@ Spree::Order.class_eval do
 
   state_machine.after_transition to: :complete, do: :capture_taxjar
   state_machine.after_transition to: :canceled, do: :delete_taxjar_transaction
+  state_machine.after_transition to: :resumed, from: :canceled, do: :capture_taxjar
 
-  def delete_taxjar_transaction
-    return unless taxjar_applicable?(self)
-    client = Spree::Taxjar.new(self)
-    client.delete_transaction_for_order
-  end
+  private
 
-  def capture_taxjar
-    return unless taxjar_applicable?(self)
-    client = Spree::Taxjar.new(self)
-    client.create_transaction_for_order
-  end
+    def delete_taxjar_transaction
+      return unless taxjar_applicable?(self)
+      client = Spree::Taxjar.new(self)
+      client.delete_transaction_for_order
+    end
+
+    def capture_taxjar
+      return unless taxjar_applicable?(self)
+      client = Spree::Taxjar.new(self)
+      client.create_transaction_for_order
+    end
 end
