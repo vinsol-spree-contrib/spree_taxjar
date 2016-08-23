@@ -5,9 +5,7 @@ Spree::Taxjar is a US sales tax extension for Spree using the Taxjar service.
 
 Taxjar Configuration
 
-Create an account with Taxjar (http://www.taxjar.com/)...
-
-...and get an api_key.
+Create an account with Taxjar (http://www.taxjar.com/) and get an api_key.
 
 Go to Your Account >> States Setting, and create nexus for the relevant states in which you want/need to collect sales tax. (NOTE: Unless state's nexuses are explicitly created, Taxjar will return zero sales tax by default for orders shipping to those states.)
 
