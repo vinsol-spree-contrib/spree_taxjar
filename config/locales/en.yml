@@ -1,5 +1,7 @@
-# Sample localization file for English. Add more files in this directory for other locales.
-# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
-
 en:
-  hello: "Hello world"
+  spree:
+    api_key_updated: Taxjar Api Key successfully updated
+    shipping_rate_exception_message: TaxJar cannot calculate inclusive sales taxes.
+    taxjar_api_key: Taxjar API Key
+    taxjar_calculator_description: Taxjar Calculator
+    taxjar_settings: Taxjar Settings
