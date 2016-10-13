@@ -34,11 +34,31 @@ module Spree
       nexus_regions.map { |record| record[:region_code]}
     end
 
-    def calculate_tax_for_order(options)
-      @client.tax_for_order(options)
+    def calculate_tax_for_order
+      @client.tax_for_order(tax_params)
     end
 
     private
+
+      def tax_params
+        {
+          amount: @order.item_total,
+          shipping: 0,
+          to_state: @order.ship_address.state.abbr,
+          to_zip: @order.ship_address.zipcode,
+          line_items: taxable_line_items_params
+        }
+      end
+
+      def taxable_line_items_params
+        @order.line_items.map do |item|
+          {
+            id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price
+          }
+        end
+      end
 
       def reimbursement_present?
         @client.list_refunds(from_transaction_date: Date.today - 1, to_transaction_date: Date.today + 1).include?(@reimbursement.number)
