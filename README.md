@@ -13,7 +13,7 @@ Go to Your Account >> States Setting, and create nexus for the relevant states i
 
 1. Add this extension to your Gemfile with this line:
   ```ruby
-  gem 'spree_taxjar', github: '[your-github-handle]/spree_taxjar', branch: 'X-X-stable'
+  gem 'spree_taxjar', github: 'vinsol/spree_taxjar'
   ```
 
   The `branch` option is important: it must match the version of Spree you're using.

@@ -2,7 +2,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_taxjar'
-  s.version     = '3.1.0.rc3'
+  s.version     = '3.1.0'
   s.summary     = 'Spree extension to calculate sales tax in states of USA'
   s.description = 'Spree extension for providing Taxjar services in USA'
   s.required_ruby_version = '>= 2.1.0'
