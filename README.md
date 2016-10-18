@@ -1,13 +1,21 @@
 SpreeTaxjar
 ===========
 
-Introduction goes here.
+Spree::Taxjar is a US sales tax extension for Spree using the Taxjar service.
+
+Taxjar Configuration
+
+Create an account with Taxjar (http://www.taxjar.com/)...
+
+...and get an api_key.
+
+Go to Your Account >> States Setting, and create nexus for the relevant states in which you want/need to collect sales tax. (NOTE: Unless state's nexuses are explicitly created, Taxjar will return zero sales tax by default for orders shipping to those states.)
 
 ## Installation
 
 1. Add this extension to your Gemfile with this line:
   ```ruby
-  gem 'spree_taxjar', github: '[your-github-handle]/spree_taxjar', branch: 'X-X-stable'
+  gem 'spree_taxjar', github: 'vinsol/spree_taxjar'
   ```
 
   The `branch` option is important: it must match the version of Spree you're using.
@@ -26,6 +34,9 @@ Introduction goes here.
 4. Restart your server
 
   If your server was running, restart it so that it can find the assets properly.
+
+5. Go to admin end > Configurations > Taxjar Settings
+  Add your taxjar api_key here.
 
 ## Testing
 
@@ -51,3 +62,16 @@ If you'd like to contribute, please take a look at the
 pull request.
 
 Copyright (c) 2016 [name of extension creator], released under the New BSD License
+
+#Note
+
+For better handling of exception raised by taxjar due to various validations add following code in your project's application_controller.rb
+
+    rescue_from Taxjar::Error, with: :taxjar_rollback
+
+    private
+      def taxjar_rollback(e)
+        flash[:error] = 'TaxJar::' + e.message
+        redirect_to cart_path
+      end
+
