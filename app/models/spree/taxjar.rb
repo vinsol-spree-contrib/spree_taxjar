@@ -35,7 +35,7 @@ module Spree
     end
 
     def calculate_tax_for_order
-      @client.tax_for_order(tax_params)
+      @client.tax_for_order(tax_params) if has_nexus?
     end
 
     private
