@@ -50,6 +50,7 @@ module Spree
 
         unless Rails.cache.read(cache_key(order, item, ship_address))
           taxjar_response = Spree::Taxjar.new(order).calculate_tax_for_order
+          return 0 unless taxjar_response
           cache_response(taxjar_response, order, ship_address)
         end
 
