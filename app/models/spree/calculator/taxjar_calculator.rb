@@ -2,7 +2,6 @@ require_dependency 'spree/calculator'
 
 module Spree
   class Calculator::TaxjarCalculator < Calculator
-    include VatPriceCalculation
 
     def self.description
       Spree.t(:taxjar_calculator_description)
@@ -65,6 +64,10 @@ module Spree
         else
           ['Spree::Shipment', order.id, item.id, ship_address.state.id, ship_address.zipcode, item.cost, :amount_to_collect]
         end
+      end
+
+      def round_to_two_places(amount)
+        BigDecimal.new(amount.to_s).round(2, BigDecimal::ROUND_HALF_UP)
       end
   end
 end

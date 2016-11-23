@@ -25,10 +25,6 @@ describe Spree::Calculator::TaxjarCalculator do
     allow(line_item).to receive(:tax_collectable).and_return(2.0)
   end
 
-  describe 'Constants' do
-    it { expect(Spree::Calculator::TaxjarCalculator.include?(Spree::VatPriceCalculation)).to be true }
-  end
-
   describe ".description" do
     it 'returns the description for the calculator' do
       expect(calculator.description).to eq(Spree.t(:taxjar_calculator_description))
