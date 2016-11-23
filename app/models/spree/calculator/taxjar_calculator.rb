@@ -34,14 +34,9 @@ module Spree
       end
     end
 
-
     private
       def rate
         calculable
-      end
-
-      def deduced_total_by_rate(pre_tax_amount, rate)
-        round_to_two_places(pre_tax_amount * rate.amount)
       end
 
       def tax_for_item(item)
@@ -62,10 +57,6 @@ module Spree
           item =  Spree::LineItem.find_by(id: line_item.id)
           Rails.cache.write(cache_key(order, item, ship_address), line_item.tax_collectable, expires_in: 10.minutes)
         end
-      end
-
-      def set_parameters(item, ship_address)
-        @parameters = { amount: item.pre_tax_amount, shipping: 0, to_state: ship_address.state.abbr, to_zip: ship_address.zipcode }
       end
 
       def cache_key(order, item, ship_address)

@@ -16,22 +16,42 @@ describe Spree::Calculator::TaxjarCalculator do
   let(:taxjar_response) { double(Taxjar::Tax) }
 
   before do
-    allow(Taxjar::Client).to receive(:new).with(api_key: 'b9f8755404c74f63a0a7716cca39fae2').and_return(taxjar)
+    Spree::Config[:taxjar_api_key] = '3d5b71689cf70fc393efb6cf2dd3dc9d'
+    allow(Taxjar::Client).to receive(:new).with(api_key: '3d5b71689cf70fc393efb6cf2dd3dc9d').and_return(taxjar)
+    allow(taxjar).to receive(:nexuses).and_return([])
     allow(taxjar).to receive(:tax_for_order).and_return(taxjar_response)
     allow(taxjar_response).to receive(:[]).with('amount_to_collect').and_return(2.0)
+    allow(taxjar_response).to receive_message_chain(:breakdown, :line_items).and_return(order.line_items)
+    allow(line_item).to receive(:tax_collectable).and_return(2.0)
+  end
+
+  describe 'Constants' do
+    it { expect(Spree::Calculator::TaxjarCalculator.include?(Spree::VatPriceCalculation)).to be true }
   end
 
   describe ".description" do
-    it { expect(calculator.description).to eq(Spree.t(:taxjar_calculator_description)) }
+    it 'returns the description for the calculator' do
+      expect(calculator.description).to eq(Spree.t(:taxjar_calculator_description))
+    end
   end
 
-  describe '#compute_order' do
-    it { expect(calculator.compute_order(order)).to eq(2.0) }
+  describe "#compute_order" do
+    it 'returns tax for the order upto two decimal places' do
+      expect(calculator.compute_order(order)).to eq(2.0)
+    end
+  end
+
+  describe "#tax_for_item" do
+    it 'returns tax for the line_item upto two decimal places' do
+      expect(calculator.send(:tax_for_item, line_item)).to eq(2.0)
+    end
   end
 
   describe '#compute_shipment_or_line_item' do
     context 'when rate not included in price' do
-      it { expect(calculator.compute_shipment_or_line_item(line_item)).to eq(2.0) }
+      it 'returns tax for the line_item/shipment upto two decimal places' do
+        expect(calculator.compute_shipment_or_line_item(line_item)).to eq(2.0)
+      end
     end
 
     context 'when rate included in price' do
@@ -39,26 +59,61 @@ describe Spree::Calculator::TaxjarCalculator do
         rate.included_in_price = true
         rate.save
       end
-      it { expect(calculator.compute_shipment_or_line_item(line_item)).to eq(0) }
+      it 'returns tax for the line_item/shipment upto two decimal places' do
+        expect(calculator.compute_shipment_or_line_item(line_item)).to eq(0)
+      end
     end
   end
 
   describe '#rate' do
-    it { expect(calculator.send(:rate)).to eq(rate) }
+    it 'returns calculable' do
+      expect(calculator.send(:rate)).to eq(rate)
+    end
   end
 
-  describe '#deduced_total_by_rate' do
-    it { expect(calculator.send(:deduced_total_by_rate, 100, rate)).to eq(5) }
-  end
-
-  describe '#set_parameters' do
-    before { @parameters = calculator.send(:set_parameters, line_item, order.ship_address) }
-    it { expect(@parameters.keys).to match_array([:amount, :shipping, :to_state, :to_zip]) }
-    it { expect(@parameters.values).to match_array([line_item.pre_tax_amount, 0, ship_address.state.abbr, ship_address.zipcode]) }
+  describe '#compute_shipping_rate' do
+    context 'when rate included in price' do
+      before do
+        rate.included_in_price = true
+        rate.save
+      end
+      it 'will raise RuntimeError' do
+        expect{ calculator.compute_shipping_rate(line_item)}.to raise_error(RuntimeError)
+      end
+    end
+    context 'when rate not included in price' do
+      it 'will return tax for shipping' do
+        expect(calculator.compute_shipping_rate(line_item)).to eq(0.0)
+      end
+    end
   end
 
   describe '#cache_key' do
-    it { expect(calculator.send(:cache_key, order, line_item, ship_address)).to match_array([order.id, line_item.id, ship_address.state_id, ship_address.zipcode, line_item.pre_tax_amount, :amount_to_collect]) }
+    context 'when key is line item' do
+      it 'will return cache key for line item' do
+        expect(calculator.send(:cache_key, order, line_item, ship_address)).to eq(['Spree::LineItem', order.id, line_item.id, ship_address.state.id, ship_address.zipcode, line_item.amount, :amount_to_collect])
+      end
+    end
+    context 'when key is shipment' do
+      it 'will return cache key for line item' do
+        expect(calculator.send(:cache_key, order, shipment, ship_address)).to eq(['Spree::Shipment', order.id, shipment.id, ship_address.state.id, ship_address.zipcode, shipment.cost, :amount_to_collect])
+      end
+    end
   end
 
+  describe '#cache_response' do
+    before do
+      @line_item = [{}]
+      allow(taxjar_response).to receive_message_chain(:breakdown, :line_items).and_return(@line_item)
+      allow(@line_item.first).to receive(:id).and_return(line_item.id)
+      allow(@line_item.first).to receive(:tax_collectable).and_return(2.0)
+    end
+    it 'sets Rails cache' do
+      calculator.send(:cache_response, taxjar_response, order, ship_address)
+      expect(Rails.cache.read(calculator.send(:cache_key, order, line_item, ship_address))).to eq 2.0
+    end
+
+    after { calculator.send(:cache_response, taxjar_response, order, ship_address) }
+
+  end
 end
