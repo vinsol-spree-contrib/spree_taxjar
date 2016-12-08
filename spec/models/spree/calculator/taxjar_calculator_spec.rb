@@ -17,6 +17,8 @@ describe Spree::Calculator::TaxjarCalculator do
 
   before do
     Spree::Config[:taxjar_api_key] = '3d5b71689cf70fc393efb6cf2dd3dc9d'
+    ## Forcing tests with shipping_address as tax_address
+    Spree::Config[:tax_using_ship_address] = true
     allow(Taxjar::Client).to receive(:new).with(api_key: '3d5b71689cf70fc393efb6cf2dd3dc9d').and_return(taxjar)
     allow(taxjar).to receive(:nexus_regions).and_return([])
     allow(taxjar).to receive(:tax_for_order).and_return(taxjar_response)

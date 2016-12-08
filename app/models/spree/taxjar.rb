@@ -24,7 +24,7 @@ module Spree
     def has_nexus?
       nexus_regions = @client.nexus_regions
       if nexus_regions.present?
-        nexus_states(nexus_regions).include?(@order.ship_address.state.abbr)
+        nexus_states(nexus_regions).include?(tax_address_state_abbr)
       else
         false
       end
@@ -40,12 +40,32 @@ module Spree
 
     private
 
+      def tax_address_country_iso
+        tax_address.country.iso
+      end
+
+      def tax_address_state_abbr
+        tax_address.state.abbr
+      end
+
+      def tax_address_city
+        tax_address.city
+      end
+
+      def tax_address_zip
+        tax_address.zipcode
+      end
+
+      def tax_address
+        @order.tax_address
+      end
+
       def tax_params
         {
           amount: @order.item_total,
           shipping: 0,
-          to_state: @order.ship_address.state.abbr,
-          to_zip: @order.ship_address.zipcode,
+          to_state: tax_address_state_abbr,
+          to_zip: tax_address_zip,
           line_items: taxable_line_items_params
         }
       end
@@ -105,10 +125,10 @@ module Spree
 
       def address_params
         {
-          to_country: @order.ship_country.iso,
-          to_zip: @order.ship_zipcode,
-          to_state: @order.ship_state.abbr,
-          to_city: @order.ship_city
+          to_country: tax_address_country_iso,
+          to_zip: tax_address_zip,
+          to_state: tax_address_state_abbr,
+          to_city: tax_address_city
         }
       end
 

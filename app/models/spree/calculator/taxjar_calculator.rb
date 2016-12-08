@@ -41,29 +41,29 @@ module Spree
 
       def tax_for_item(item)
         order = item.order
-        return 0 unless ship_address = order.shipping_address
+        return 0 unless tax_address = order.tax_address
 
-        unless Rails.cache.read(cache_key(order, item, ship_address))
+        unless Rails.cache.read(cache_key(order, item, tax_address))
           taxjar_response = Spree::Taxjar.new(order).calculate_tax_for_order
           return 0 unless taxjar_response
-          cache_response(taxjar_response, order, ship_address)
+          cache_response(taxjar_response, order, tax_address)
         end
 
-        Rails.cache.read(cache_key(order, item, ship_address))
+        Rails.cache.read(cache_key(order, item, tax_address))
       end
 
-      def cache_response(taxjar_response, order, ship_address)
+      def cache_response(taxjar_response, order, address)
         taxjar_response.breakdown.line_items.each do |line_item|
           item =  Spree::LineItem.find_by(id: line_item.id)
-          Rails.cache.write(cache_key(order, item, ship_address), line_item.tax_collectable, expires_in: 10.minutes)
+          Rails.cache.write(cache_key(order, item, address), line_item.tax_collectable, expires_in: 10.minutes)
         end
       end
 
-      def cache_key(order, item, ship_address)
+      def cache_key(order, item, address)
         if item.is_a?(Spree::LineItem)
-          ['Spree::LineItem', order.id, item.id, ship_address.state.id, ship_address.zipcode, item.amount, :amount_to_collect]
+          ['Spree::LineItem', order.id, item.id, address.state.id, address.zipcode, item.amount, :amount_to_collect]
         else
-          ['Spree::Shipment', order.id, item.id, ship_address.state.id, ship_address.zipcode, item.cost, :amount_to_collect]
+          ['Spree::Shipment', order.id, item.id, address.state.id, address.zipcode, item.cost, :amount_to_collect]
         end
       end
   end
