@@ -11,13 +11,6 @@ describe Spree::Order do
     end
   end
 
-  describe 'Delegators' do
-    it { should delegate_method(:country).to(:ship_address).with_prefix(:ship) }
-    it { should delegate_method(:zipcode).to(:ship_address).with_prefix(:ship) }
-    it { should delegate_method(:state).to(:ship_address).with_prefix(:ship) }
-    it { should delegate_method(:city).to(:ship_address).with_prefix(:ship) }
-  end
-
   describe 'Instance Methods' do
     describe '#delete_taxjar_transaction' do
       context 'when taxjar_applicable? returns false' do
