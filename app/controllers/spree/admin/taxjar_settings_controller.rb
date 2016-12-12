@@ -6,9 +6,7 @@ module Spree
       end
 
       def update
-        params.each do |name, value|
-          Spree::Config[name] = value if Spree::Config.has_preference? name
-        end
+        Spree::Config[:taxjar_api_key] = params[:taxjar_api_key]
 
         flash[:success] = Spree.t(:api_key_updated)
         redirect_to edit_admin_taxjar_settings_path

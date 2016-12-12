@@ -16,9 +16,6 @@ Go to Your Account >> States Setting, and create nexus for the relevant states i
   gem 'spree_taxjar', github: 'vinsol-spree-contrib/spree_taxjar'
   ```
 
-  The `branch` option is important: it must match the version of Spree you're using.
-  For example, use `3-1-stable` if you're using Spree `3-1-stable` or any `3.1.x` version.
-
 2. Install the gem using Bundler:
   ```ruby
   bundle install
@@ -45,21 +42,12 @@ bundle
 bundle exec rake
 ```
 
-When testing your applications integration with this extension you may use it's factories.
-Simply add this require statement to your spec_helper:
+Credits
+-------
 
-```ruby
-require 'spree_taxjar/factories'
-```
+[![vinsol.com: Ruby on Rails, iOS and Android developers](http://vinsol.com/vin_logo.png "Ruby on Rails, iOS and Android developers")](http://vinsol.com)
 
-
-## Contributing
-
-If you'd like to contribute, please take a look at the
-[instructions](CONTRIBUTING.md) for installing dependencies and crafting a good
-pull request.
-
-Copyright (c) 2016 [name of extension creator], released under the New BSD License
+Copyright (c) 2016 [vinsol.com](http://vinsol.com "Ruby on Rails, iOS and Android developers"), released under the New MIT License
 
 #Note
 

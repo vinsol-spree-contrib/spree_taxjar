@@ -2,7 +2,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_taxjar'
-  s.version     = '3.1.0'
+  s.version     = '3.2.0.beta1'
   s.summary     = 'Spree extension to calculate sales tax in states of USA'
   s.description = 'Spree extension for providing Taxjar services in USA'
   s.required_ruby_version = '>= 2.1.0'
@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.requirements << 'none'
 
-  s.add_dependency 'spree_core', '~> 3.1.0.rc3'
+  s.add_dependency('spree_core', '~> 3.2.0.beta1')
   s.add_dependency 'taxjar-ruby', '~> 1.3.2'
 
   s.add_development_dependency 'capybara', '~> 2.6'
@@ -27,4 +27,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'selenium-webdriver', '~> 2.53.4'
   s.add_development_dependency 'simplecov', '~> 0.12.0'
   s.add_development_dependency 'sqlite3', '~> 1.3.11'
+  s.add_development_dependency 'shoulda-matchers'
+  s.add_development_dependency 'rspec-activemodel-mocks'
 end
