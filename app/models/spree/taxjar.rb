@@ -22,7 +22,7 @@ module Spree
     end
 
     def has_nexus?
-      nexus_regions = @client.nexuses
+      nexus_regions = @client.nexus_regions
       if nexus_regions.present?
         nexus_states(nexus_regions).include?(@order.ship_address.state.abbr)
       else
