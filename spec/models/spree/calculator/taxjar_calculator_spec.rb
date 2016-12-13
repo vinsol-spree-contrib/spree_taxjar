@@ -18,7 +18,7 @@ describe Spree::Calculator::TaxjarCalculator do
   before do
     Spree::Config[:taxjar_api_key] = '3d5b71689cf70fc393efb6cf2dd3dc9d'
     allow(Taxjar::Client).to receive(:new).with(api_key: '3d5b71689cf70fc393efb6cf2dd3dc9d').and_return(taxjar)
-    allow(taxjar).to receive(:nexuses).and_return([])
+    allow(taxjar).to receive(:nexus_regions).and_return([])
     allow(taxjar).to receive(:tax_for_order).and_return(taxjar_response)
     allow(taxjar_response).to receive(:[]).with('amount_to_collect').and_return(2.0)
     allow(taxjar_response).to receive_message_chain(:breakdown, :line_items).and_return(order.line_items)
