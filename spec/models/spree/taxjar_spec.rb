@@ -85,7 +85,7 @@ describe Spree::Taxjar do
     describe '#has_nexus?' do
       context 'nexus_regions is not present' do
         before do
-          allow(client).to receive(:nexuses).and_return([])
+          allow(client).to receive(:nexus_regions).and_return([])
         end
         it 'should return false' do
           expect(spree_taxjar.has_nexus?).to eq false
@@ -94,7 +94,7 @@ describe Spree::Taxjar do
 
       context 'nexus_regions is present' do
         before do
-          allow(client).to receive(:nexuses).and_return([{region_code: ship_address.state.abbr}])
+          allow(client).to receive(:nexus_regions).and_return([{region_code: ship_address.state.abbr}])
         end
         it 'should return false' do
           expect(spree_taxjar.has_nexus?).to eq true
