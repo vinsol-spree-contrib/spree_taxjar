@@ -63,7 +63,7 @@ module Spree
       def tax_params
         {
           amount: @order.item_total,
-          shipping: 0,
+          shipping: @order.shipment_total,
           to_state: tax_address_state_abbr,
           to_zip: tax_address_zip,
           line_items: taxable_line_items_params
@@ -72,11 +72,15 @@ module Spree
 
       def taxable_line_items_params
         @order.line_items.map do |item|
-          {
+          h = {
             id: item.id,
             quantity: item.quantity,
-            unit_price: item.price
+            unit_price: item.price,
+            discount: item.promo_total
           }
+          product_tax_code = item.tax_category.try(:tax_code)
+          h.merge(product_tax_code: product_tax_code) if product_tax_code
+          h
         end
       end
 
@@ -91,12 +95,16 @@ module Spree
       def return_items_params
         group_by_line_items.map do |line_item, return_items|
           item = return_items.first
-          {
+          h = {
             quantity: return_items.length,
             product_identifier: item.variant.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.variant.description).truncate(150),
-            unit_price: item.pre_tax_amount
+            unit_price: item.pre_tax_amount,
+            discount: item.promo_total
           }
+          product_tax_code = item.tax_category.try(:tax_code)
+          h.merge(product_tax_code: product_tax_code) if product_tax_code
+          h
         end
       end
 
@@ -134,13 +142,17 @@ module Spree
 
       def line_item_params
         @order.line_items.map do |item|
-          {
+          h = {
             quantity: item.quantity,
             product_identifier: item.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.description).try(:truncate, 150),
             unit_price: item.price,
+            discount: item.promo_total,
             sales_tax: item.additional_tax_total
           }
+          product_tax_code = item.tax_category.try(:tax_code)
+          h.merge(product_tax_code: product_tax_code) if product_tax_code
+          h
         end
       end
 
