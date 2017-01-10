@@ -1,17 +1,17 @@
 module SpreeTaxjar
   class Categories
     class << self
-      def update(categories = [])
-        categories = default_categories if categories.empty?
-        default_categories.each do |c|
-          p = convert_to_hash(c)
-          t = Spree::TaxCategory.where(name: name(p)).first
-          if t.present?
-            p "TaxCategory:: Update:: #{t.inspect}"
-            t.update_attributes!(transform(p))
+      def update(tax_categories = [])
+        tax_categories = default_tax_categories if tax_categories.empty?
+        tax_categories.each do |tax_category|
+          tax_category_attributes = convert_to_hash(tax_category)
+          tax_category_in_db = Spree::TaxCategory.where(name: name(tax_category_attributes)).first
+          if tax_category_in_db.present?
+            p "TaxCategory:: Update:: #{tax_category_in_db.inspect}"
+            tax_category_in_db.update_attributes!(transform(tax_category_attributes))
           else
-            new_category = Spree::TaxCategory.create!(transform(p))
-            p "TaxCategory:: Create:: #{new_category.inspect}"
+            new_tax_category = Spree::TaxCategory.create!(transform(tax_category_attributes))
+            p "TaxCategory:: Create:: #{new_tax_category.inspect}"
           end
         end
       end
@@ -19,33 +19,33 @@ module SpreeTaxjar
       def refresh
         p "Taxjar:: Categories:: API Call started !!"
         client = ::Taxjar::Client.new(api_key: Spree::Config[:taxjar_api_key])
-        categories = client.categories
+        tax_categories = client.categories
         p "Taxjar:: Categories:: Update Started"
-        update(categories)
+        update(tax_categories)
       end
 
       private
-        def convert_to_hash(p)
-          p.to_h
+        def convert_to_hash(tax_category)
+          tax_category.to_h
         end
 
-        def transform(p)
-          {name: name(p), tax_code: tax_code(p), description: description(p)}
+        def transform(tax_category)
+          {name: name(tax_category), tax_code: tax_code(tax_category), description: description(tax_category)}
         end
 
-        def name(p)
-          p.fetch(:name)
+        def name(tax_category)
+          tax_category.fetch(:name)
         end
 
-        def tax_code(p)
-          p.fetch(:product_tax_code)
+        def tax_code(tax_category)
+          tax_category.fetch(:product_tax_code)
         end
 
-        def description(p)
-          p.fetch(:description)
+        def description(tax_category)
+          tax_category.fetch(:description)
         end
 
-        def default_categories
+        def default_tax_categories
           [
             {:name=>"Digital Goods", :product_tax_code=>"31000", :description=>"Digital products transferred electronically, meaning obtained by the purchaser by means other than tangible storage media."},
             {:name=>"Clothing", :product_tax_code=>"20010", :description=>" All human wearing apparel suitable for general use"},
