@@ -72,15 +72,15 @@ module Spree
 
       def taxable_line_items_params
         @order.line_items.map do |item|
-          h = {
+          line_item_attributes = {
             id: item.id,
             quantity: item.quantity,
             unit_price: item.price,
             discount: item.promo_total
           }
           product_tax_code = item.tax_category.try(:tax_code)
-          h.merge(product_tax_code: product_tax_code) if product_tax_code
-          h
+          line_item_attributes.merge(product_tax_code: product_tax_code) if product_tax_code
+          line_item_attributes
         end
       end
 
@@ -95,16 +95,16 @@ module Spree
       def return_items_params
         group_by_line_items.map do |line_item, return_items|
           item = return_items.first
-          h = {
+          line_item_attributes = {
             quantity: return_items.length,
             product_identifier: item.variant.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.variant.description).truncate(150),
             unit_price: item.pre_tax_amount,
-            discount: item.promo_total
+            #discount: item.promo_total
           }
-          product_tax_code = item.tax_category.try(:tax_code)
-          h.merge(product_tax_code: product_tax_code) if product_tax_code
-          h
+          product_tax_code = item.variant.tax_category.try(:tax_code)
+          line_item_attributes.merge(product_tax_code: product_tax_code) if product_tax_code
+          line_item_attributes
         end
       end
 
@@ -142,7 +142,7 @@ module Spree
 
       def line_item_params
         @order.line_items.map do |item|
-          h = {
+          line_item_attributes = {
             quantity: item.quantity,
             product_identifier: item.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.description).try(:truncate, 150),
@@ -151,8 +151,8 @@ module Spree
             sales_tax: item.additional_tax_total
           }
           product_tax_code = item.tax_category.try(:tax_code)
-          h.merge(product_tax_code: product_tax_code) if product_tax_code
-          h
+          line_item_attributes.merge(product_tax_code: product_tax_code) if product_tax_code
+          line_item_attributes
         end
       end
 
