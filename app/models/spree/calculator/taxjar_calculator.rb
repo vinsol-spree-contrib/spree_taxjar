@@ -15,6 +15,7 @@ module Spree
     end
 
     def compute_line_item(item)
+      return 0 unless Spree::Config[:taxjar_enabled]
       if rate.included_in_price
         0
       else
@@ -23,10 +24,12 @@ module Spree
     end
 
     def compute_shipment(item)
+      return 0 unless Spree::Config[:taxjar_enabled]
       tax_for_shipment(item)
     end
 
     def compute_shipping_rate(shipping_rate)
+      return 0 unless Spree::Config[:taxjar_enabled]
       if rate.included_in_price
         raise Spree.t(:shipping_rate_exception_message)
       else
