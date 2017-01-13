@@ -23,7 +23,11 @@ module Spree
     end
 
     def calculate_tax_for_shipment
-      @client.tax_for_order(shipment_tax_params).amount_to_collect if has_nexus?
+      if has_nexus?
+        @client.tax_for_order(shipment_tax_params).amount_to_collect
+      else
+        0
+      end
     end
 
     def has_nexus?
@@ -40,7 +44,11 @@ module Spree
     end
 
     def calculate_tax_for_order
-      @client.tax_for_order(tax_params) if has_nexus?
+      if has_nexus?
+        @client.tax_for_order(tax_params)
+      else
+        0
+      end
     end
 
     private
@@ -68,7 +76,7 @@ module Spree
       def tax_params
         {
           amount: @order.item_total,
-          shipping: 0,
+          shipping: @order.shipment_total,
           to_state: tax_address_state_abbr,
           to_zip: tax_address_zip,
           line_items: taxable_line_items_params
@@ -80,7 +88,9 @@ module Spree
           {
             id: item.id,
             quantity: item.quantity,
-            unit_price: item.price
+            unit_price: item.price,
+            discount: item.promo_total,
+            product_tax_code: item.tax_category.try(:tax_code)
           }
         end
       end
@@ -100,7 +110,8 @@ module Spree
             quantity: return_items.length,
             product_identifier: item.variant.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.variant.description).truncate(150),
-            unit_price: item.pre_tax_amount
+            unit_price: item.pre_tax_amount,
+            product_tax_code: item.variant.tax_category.try(:tax_code)
           }
         end
       end
@@ -110,8 +121,8 @@ module Spree
           transaction_id: @reimbursement.number,
           transaction_reference_id: @order.number,
           transaction_date: @order.completed_at.as_json,
-          amount: @reimbursement.return_items.sum(:pre_tax_amount) + @order.shipment_total,
-          shipping: @order.shipment_total + @order.adjustment_total - @order.additional_tax_total,
+          amount: @reimbursement.return_items.sum(:pre_tax_amount),
+          shipping: 0,
           sales_tax: @reimbursement.return_items.sum(:additional_tax_total),
           line_items: return_items_params
         })
@@ -121,8 +132,8 @@ module Spree
         address_params.merge({
           transaction_id: @order.number,
           transaction_date: @order.completed_at.as_json,
-          amount: @order.total - @order.additional_tax_total,
-          shipping: @order.shipment_total + @order.adjustment_total - @order.additional_tax_total,
+          amount: @order.item_total + @order.shipment_total,
+          shipping: @order.shipment_total,
           sales_tax: @order.additional_tax_total,
           line_items: line_item_params
         })
@@ -151,7 +162,9 @@ module Spree
             product_identifier: item.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.description).try(:truncate, 150),
             unit_price: item.price,
-            sales_tax: item.additional_tax_total
+            sales_tax: item.additional_tax_total,
+            discount: item.promo_total,
+            product_tax_code: item.tax_category.try(:tax_code)
           }
         end
       end
