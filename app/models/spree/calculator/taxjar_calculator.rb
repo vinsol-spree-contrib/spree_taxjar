@@ -4,18 +4,17 @@ module Spree
   class Calculator::TaxjarCalculator < Calculator
     include VatPriceCalculation
 
+    CACHE_EXPIRATION_DURATION = 10.minutes
+
     def self.description
       Spree.t(:taxjar_calculator_description)
     end
 
     def compute_order(order)
-      tax = order.line_items.to_a.sum do |line_item|
-        tax_for_item(line_item)
-      end
-      round_to_two_places(tax)
+      raise "Calculate tax for line_item and shipment and not order"
     end
 
-    def compute_shipment_or_line_item(item)
+    def compute_line_item(item)
       if rate.included_in_price
         0
       else
@@ -23,8 +22,9 @@ module Spree
       end
     end
 
-    alias_method :compute_shipment, :compute_shipment_or_line_item
-    alias_method :compute_line_item, :compute_shipment_or_line_item
+    def compute_shipment(item)
+      tax_for_shipment(item)
+    end
 
     def compute_shipping_rate(shipping_rate)
       if rate.included_in_price
@@ -37,6 +37,15 @@ module Spree
     private
       def rate
         calculable
+      end
+
+      def tax_for_shipment(shipment)
+        order = shipment.order
+        return 0 unless tax_address = order.tax_address
+
+        Rails.cache.fetch(cache_key(order, shipment, tax_address), expires_in: CACHE_EXPIRATION_DURATION) do
+          Spree::Taxjar.new(order, nil, shipment).calculate_tax_for_shipment
+        end
       end
 
       def tax_for_item(item)
@@ -55,7 +64,7 @@ module Spree
       def cache_response(taxjar_response, order, address)
         taxjar_response.breakdown.line_items.each do |line_item|
           item =  Spree::LineItem.find_by(id: line_item.id)
-          Rails.cache.write(cache_key(order, item, address), line_item.tax_collectable, expires_in: 10.minutes)
+          Rails.cache.write(cache_key(order, item, address), line_item.tax_collectable, expires_in: CACHE_EXPIRATION_DURATION)
         end
       end
 

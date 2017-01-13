@@ -1,8 +1,9 @@
 module Spree
   class Taxjar
 
-    def initialize(order = nil, reimbursement = nil)
+    def initialize(order = nil, reimbursement = nil, shipment = nil)
       @order = order
+      @shipment = shipment
       @reimbursement = reimbursement
       @client = ::Taxjar::Client.new(api_key: Spree::Config[:taxjar_api_key])
     end
@@ -21,6 +22,10 @@ module Spree
       @client.delete_order(@order.number) if has_nexus?
     end
 
+    def calculate_tax_for_shipment
+      @client.tax_for_order(shipment_tax_params).amount_to_collect if has_nexus?
+    end
+
     def has_nexus?
       nexus_regions = @client.nexus_regions
       if nexus_regions.present?
@@ -31,7 +36,7 @@ module Spree
     end
 
     def nexus_states(nexus_regions)
-      nexus_regions.map { |record| record[:region_code]}
+      nexus_regions.map { |record| record.region_code}
     end
 
     def calculate_tax_for_order
@@ -130,6 +135,13 @@ module Spree
           to_state: tax_address_state_abbr,
           to_city: tax_address_city
         }
+      end
+
+      def shipment_tax_params
+        address_params.merge({
+          amount: 0,
+          shipping: @shipment.cost
+        })
       end
 
       def line_item_params
