@@ -3,6 +3,8 @@ module SpreeTaxjar
     require 'spree/core'
     require 'taxjar'
 
+    config.autoload_paths += %W(#{config.root}/lib)
+
     isolate_namespace Spree
     engine_name 'spree_taxjar'
 
