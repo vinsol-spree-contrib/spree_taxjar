@@ -24,7 +24,7 @@ module TaxjarHelper
     end
 
     def logger_enabled?
-      true
+      Spree::Config[:taxjar_debug_enabled]
     end
 
     def progname(progname = nil)
