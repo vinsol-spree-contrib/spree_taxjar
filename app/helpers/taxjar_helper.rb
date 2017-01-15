@@ -59,5 +59,12 @@ module TaxjarHelper
         end
       end
     end
+
+    def log(method, request_hash = nil)
+      logger.info method.to_s + ' call'
+      return if request_hash.nil?
+      logger.debug request_hash
+      logger.debug JSON.generate(request_hash)
+    end
   end
 end
