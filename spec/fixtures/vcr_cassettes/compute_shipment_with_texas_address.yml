@@ -1,0 +1,100 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.taxjar.com/v2/nexus/regions
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - TaxjarRubyGem/1.5.0
+      Authorization:
+      - Bearer 04d828b7374896d7867b03289ea20957
+      Connection:
+      - close
+      Host:
+      - api.taxjar.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - Cowboy
+      Date:
+      - Sun, 15 Jan 2017 13:34:17 GMT
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Vary:
+      - Origin
+      Etag:
+      - W/"447b75f14eaedf6b3e59ea269af620e4"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 3c44fded-97d6-4581-ba04-4d2e6353c980
+      X-Runtime:
+      - '0.011824'
+      Content-Length:
+      - '186'
+      Via:
+      - 1.1 vegur
+    body:
+      encoding: UTF-8
+      string: '{"regions":[{"country_code":"US","country":"United States","region_code":"CA","region":"California"},{"country_code":"US","country":"United
+        States","region_code":"TX","region":"Texas"}]}'
+    http_version: 
+  recorded_at: Sun, 15 Jan 2017 13:34:17 GMT
+- request:
+    method: post
+    uri: https://api.taxjar.com/v2/taxes
+    body:
+      encoding: UTF-8
+      string: '{"to_country":"US","to_zip":"79001","to_state":"TX","to_city":"Adrian","amount":0,"shipping":"10.0"}'
+    headers:
+      User-Agent:
+      - TaxjarRubyGem/1.5.0
+      Authorization:
+      - Bearer 04d828b7374896d7867b03289ea20957
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Host:
+      - api.taxjar.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - Cowboy
+      Date:
+      - Sun, 15 Jan 2017 13:34:20 GMT
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Vary:
+      - Origin
+      Etag:
+      - W/"6742d1b81d011bd53b4964999698dc16"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 59c26711-a200-448f-b3ff-22a62f9f5d8a
+      X-Runtime:
+      - '0.022650'
+      Content-Length:
+      - '174'
+      Via:
+      - 1.1 vegur
+    body:
+      encoding: UTF-8
+      string: '{"tax":{"order_total_amount":10.0,"shipping":10.0,"taxable_amount":10.0,"amount_to_collect":0.78,"rate":0.0775,"has_nexus":true,"freight_taxable":true,"tax_source":"origin"}}'
+    http_version: 
+  recorded_at: Sun, 15 Jan 2017 13:34:20 GMT
+recorded_with: VCR 3.0.3

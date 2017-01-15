@@ -1,0 +1,100 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.taxjar.com/v2/nexus/regions
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - TaxjarRubyGem/1.5.0
+      Authorization:
+      - Bearer 04d828b7374896d7867b03289ea20957
+      Connection:
+      - close
+      Host:
+      - api.taxjar.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - Cowboy
+      Date:
+      - Sun, 15 Jan 2017 15:17:17 GMT
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Vary:
+      - Origin
+      Etag:
+      - W/"447b75f14eaedf6b3e59ea269af620e4"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - bcb35d19-d090-4807-8375-3b2d797c9aa9
+      X-Runtime:
+      - '0.011324'
+      Content-Length:
+      - '186'
+      Via:
+      - 1.1 vegur
+    body:
+      encoding: UTF-8
+      string: '{"regions":[{"country_code":"US","country":"United States","region_code":"CA","region":"California"},{"country_code":"US","country":"United
+        States","region_code":"TX","region":"Texas"}]}'
+    http_version: 
+  recorded_at: Sun, 15 Jan 2017 15:17:18 GMT
+- request:
+    method: post
+    uri: https://api.taxjar.com/v2/taxes
+    body:
+      encoding: UTF-8
+      string: '{"amount":"0.0","shipping":"0.0","to_state":"TX","to_zip":"79001","line_items":[{"id":1,"quantity":3,"unit_price":"10.0","discount":"0.0","product_tax_code":null},{"id":2,"quantity":3,"unit_price":"10.0","discount":"0.0","product_tax_code":"99999"}]}'
+    headers:
+      User-Agent:
+      - TaxjarRubyGem/1.5.0
+      Authorization:
+      - Bearer 04d828b7374896d7867b03289ea20957
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Host:
+      - api.taxjar.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - Cowboy
+      Date:
+      - Sun, 15 Jan 2017 15:17:19 GMT
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Vary:
+      - Origin
+      Etag:
+      - W/"a2385a180ae97ae003082f53cb3faca5"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 9f3b4da2-af9b-4f80-a756-3f6a1425b583
+      X-Runtime:
+      - '0.038290'
+      Content-Length:
+      - '1759'
+      Via:
+      - 1.1 vegur
+    body:
+      encoding: UTF-8
+      string: '{"tax":{"order_total_amount":60.0,"shipping":0.0,"taxable_amount":30.0,"amount_to_collect":2.33,"rate":0.0775,"has_nexus":true,"freight_taxable":true,"tax_source":"origin","breakdown":{"taxable_amount":30.0,"tax_collectable":2.33,"combined_tax_rate":0.0775,"state_taxable_amount":30.0,"state_tax_rate":0.0625,"state_tax_collectable":1.88,"county_taxable_amount":30.0,"county_tax_rate":0.005,"county_tax_collectable":0.15,"city_taxable_amount":30.0,"city_tax_rate":0.01,"city_tax_collectable":0.3,"special_district_taxable_amount":0.0,"special_tax_rate":0.0,"special_district_tax_collectable":0.0,"shipping":{"taxable_amount":0.0,"tax_collectable":0.0,"combined_tax_rate":0.0775,"state_taxable_amount":0.0,"state_sales_tax_rate":0.0625,"state_amount":0.0,"county_taxable_amount":0.0,"county_tax_rate":0.005,"county_amount":0.0,"city_taxable_amount":0.0,"city_tax_rate":0.01,"city_amount":0.0,"special_taxable_amount":0.0,"special_tax_rate":0.0,"special_district_amount":0.0},"line_items":[{"id":"1","taxable_amount":30.0,"tax_collectable":2.33,"combined_tax_rate":0.0775,"state_taxable_amount":30.0,"state_sales_tax_rate":0.0625,"state_amount":1.88,"county_taxable_amount":30.0,"county_tax_rate":0.005,"county_amount":0.15,"city_taxable_amount":30.0,"city_tax_rate":0.01,"city_amount":0.3,"special_district_taxable_amount":0.0,"special_tax_rate":0.0,"special_district_amount":0.0},{"id":"2","taxable_amount":0.0,"tax_collectable":0.0,"combined_tax_rate":0.0,"state_taxable_amount":0.0,"state_sales_tax_rate":0.0,"state_amount":0.0,"county_taxable_amount":0.0,"county_tax_rate":0.0,"county_amount":0.0,"city_taxable_amount":0.0,"city_tax_rate":0.0,"city_amount":0.0,"special_district_taxable_amount":0.0,"special_tax_rate":0.0,"special_district_amount":0.0}]}}}'
+    http_version: 
+  recorded_at: Sun, 15 Jan 2017 15:17:20 GMT
+recorded_with: VCR 3.0.3
