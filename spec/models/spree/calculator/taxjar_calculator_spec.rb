@@ -11,7 +11,7 @@ describe Spree::Calculator::TaxjarCalculator do
   let!(:calculator) { Spree::Calculator::TaxjarCalculator.new(calculable: rate) }
   let!(:order) { create(:order,ship_address_id: ship_address.id) }
   let!(:line_item) { create(:line_item, price: 10, quantity: 3, tax_category: tax_category, order_id: order.id) }
-  let!(:shipment) { create(:shipment, cost: 15) }
+  let!(:shipment) { create(:shipment, cost: 15, order: order) }
   let!(:taxjar) { double(Taxjar::Client) }
   let(:taxjar_response) { double(Taxjar::Tax) }
 
@@ -42,6 +42,62 @@ describe Spree::Calculator::TaxjarCalculator do
   describe "#tax_for_item" do
     it 'returns tax for the line_item upto two decimal places' do
       expect(calculator.send(:tax_for_item, line_item)).to eq(2.0)
+    end
+  end
+
+  describe '#compute_line_item' do
+    context 'when taxjar calculation disabled' do
+      before :each do
+        Spree::Config[:taxjar_enabled] = false
+      end
+
+      it 'tax should be zero' do
+        expect(calculator.compute_line_item(line_item)).to eq(0)
+      end
+    end
+
+    context 'when taxjar calculation enabled' do
+      before :each do
+        Spree::Config[:taxjar_enabled] = true
+      end
+
+      context 'when rate not included in price' do
+        it 'returns tax for the line_item upto two decimal places' do
+          expect(calculator.compute_line_item(line_item)).to eq(2.0)
+        end
+      end
+
+      context 'when rate included in price' do
+        before do
+          rate.included_in_price = true
+          rate.save!
+        end
+        it 'returns tax for the line_item upto two decimal places' do
+          expect(calculator.compute_line_item(line_item)).to eq(0)
+        end
+      end
+    end
+  end
+
+  describe '#compute_shipment' do
+    context 'when taxjar calculation disabled' do
+      before :each do
+        Spree::Config[:taxjar_enabled] = false
+      end
+
+      it 'tax should be zero' do
+        expect(calculator.compute_shipment(shipment)).to eq(0)
+      end
+    end
+
+    context 'when taxjar calculation enabled' do
+      before :each do
+        Spree::Config[:taxjar_enabled] = true
+      end
+
+      it 'should return tax on shipping' do
+        expect(calculator.compute_shipment(shipment)).to eq(0)
+      end
     end
   end
 
