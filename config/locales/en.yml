@@ -4,5 +4,6 @@ en:
     shipping_rate_exception_message: TaxJar cannot calculate inclusive sales taxes.
     taxjar_api_key: Taxjar API Key
     taxjar_enabled: Enable Taxjar Calculation
+    taxjar_debug_enabled: Enable Taxjar Debug Logging
     taxjar_calculator_description: Taxjar Calculator
     taxjar_settings: Taxjar Settings
