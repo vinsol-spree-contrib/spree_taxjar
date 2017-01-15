@@ -3,15 +3,62 @@ require 'spec_helper'
 describe Spree::Taxjar do
 
   let(:reimbursement) { create(:reimbursement) }
-  let!(:ship_address) { create(:ship_address) }
-  let(:order) { create(:order, ship_address_id: ship_address.id) }
+  let!(:country) { create(:country) }
+  let!(:state) { create(:state, country: country, abbr: "TX") }
+  let!(:zone) { create(:zone, name: "Country Zone", default_tax: true, zone_members: []) }
+  let!(:ship_address) { create(:ship_address, city: "Adrian", zipcode: "79001", state: state) }
+  let!(:tax_category) { create(:tax_category, tax_rates: []) }
+  let!(:order) { create(:order,ship_address_id: ship_address.id) }
+  let!(:line_item) { create(:line_item, price: 10, quantity: 3, order_id: order.id) }
+  let!(:state_al) { create(:state, country: country, abbr: "AL") }
+  let!(:ship_address_al) { create(:ship_address, city: "Adrian", zipcode: "79001", state: state_al) }
+  let!(:order_al) { create(:order,ship_address_id: ship_address_al.id) }
+  let!(:line_item_al) { create(:line_item, price: 10, quantity: 3, order_id: order_al.id) }
+  let!(:shipment_al) { create(:shipment, cost: 10, order: order_al) }
+  let!(:taxjar_api_key) { Spree::Config[:taxjar_api_key] = '04d828b7374896d7867b03289ea20957' }
   let(:client) { double(Taxjar::Client) }
 
+  let(:spree_taxjar) { Spree::Taxjar.new(order) }
+
+  describe '#has_nexus?' do
+    context 'nexus_regions is not present' do
+      it 'should return false' do
+        VCR.use_cassette "no_nexuses" do
+          expect(spree_taxjar.has_nexus?).to eq false
+        end
+      end
+    end
+
+    context 'nexus_regions is present' do
+      context 'tax_address is present in nexus regions' do
+        it 'should return true' do
+          VCR.use_cassette "has_nexuses" do
+            expect(spree_taxjar.has_nexus?).to eq true
+          end
+        end
+      end
+
+      context 'tax_address is not present in nexus regions' do
+        before :each do
+          @spree_taxjar_new = Spree::Taxjar.new(order_al)
+        end
+
+        it 'should return false' do
+          VCR.use_cassette "has_nexuses" do
+            expect(@spree_taxjar_new.has_nexus?).to eq false
+          end
+        end
+      end
+    end
+  end
+
   context 'When reimbursement is not present' do
-    let(:spree_taxjar) { Spree::Taxjar.new(order) }
-    before do
+    before :each do
+      Spree::Config[:taxjar_api_key] = '04d828b7374896d7867b03289ea20957'
       allow(::Taxjar::Client).to receive(:new).with(api_key: Spree::Config[:taxjar_api_key]).and_return(client)
     end
+
+    let(:spree_taxjar) { Spree::Taxjar.new(order) }
 
     describe '#initialize' do
 
@@ -82,41 +129,13 @@ describe Spree::Taxjar do
       end
     end
 
-    describe '#has_nexus?' do
-      context 'nexus_regions is not present' do
-        before do
-          allow(client).to receive(:nexus_regions).and_return([])
-        end
-        it 'should return false' do
-          expect(spree_taxjar.has_nexus?).to eq false
-        end
-      end
-
-      context 'nexus_regions is present' do
-        before do
-          allow(client).to receive(:nexus_regions).and_return([{region_code: ship_address.state.abbr}])
-        end
-        it 'should return false' do
-          expect(spree_taxjar.has_nexus?).to eq true
-        end
-      end
-    end
-
-    describe '#nexus_states' do
-      context 'nexus_regions is not present' do
-        it 'should return region_code for nexus state' do
-          expect(spree_taxjar.nexus_states([{region_code: ship_address.state.abbr}])).to eq [ship_address.state.abbr]
-        end
-      end
-    end
-
     describe '#calculate_tax_for_order' do
       context 'when has_nexus? returns false' do
         before do
           allow(spree_taxjar).to receive(:has_nexus?).and_return(false)
         end
         it 'should return nil' do
-          expect(spree_taxjar.calculate_tax_for_order).to eq nil
+          expect(spree_taxjar.calculate_tax_for_order).to eq 0
         end
       end
 
