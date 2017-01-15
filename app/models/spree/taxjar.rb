@@ -23,8 +23,13 @@ module Spree
     end
 
     def calculate_tax_for_shipment
+      SpreeTaxjar::Logger.log(__method__, {shipment: {order: {id: @shipment.order.id, number: @shipment.order.number}}}) if SpreeTaxjar::Logger.logger_enabled?
       if has_nexus?
-        @client.tax_for_order(shipment_tax_params).amount_to_collect
+        api_params = shipment_tax_params
+        SpreeTaxjar::Logger.log(__method__, {shipment: {order: {id: @shipment.order.id, number: @shipment.order.number}, api_params: api_params}}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response = @client.tax_for_order(api_params)
+        SpreeTaxjar::Logger.log(__method__, {shipment: {order: {id: @shipment.order.id, number: @shipment.order.number}, api_response: api_response}}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response.amount_to_collect
       else
         0
       end
@@ -44,8 +49,13 @@ module Spree
     end
 
     def calculate_tax_for_order
+      SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}}) if SpreeTaxjar::Logger.logger_enabled?
       if has_nexus?
-        @client.tax_for_order(tax_params)
+        api_params = tax_params
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_params: api_params}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response = @client.tax_for_order(api_params)
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response
       else
         0
       end
