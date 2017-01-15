@@ -1,0 +1,50 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.taxjar.com/v2/nexus/regions
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - TaxjarRubyGem/1.5.0
+      Authorization:
+      - Bearer 04d828b7374896d7867b03289ea20957
+      Connection:
+      - close
+      Host:
+      - api.taxjar.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - Cowboy
+      Date:
+      - Sun, 15 Jan 2017 17:25:08 GMT
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Vary:
+      - Origin
+      Etag:
+      - W/"447b75f14eaedf6b3e59ea269af620e4"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 23c18e57-59da-40c5-b197-2d824987bdf5
+      X-Runtime:
+      - '0.010733'
+      Content-Length:
+      - '186'
+      Via:
+      - 1.1 vegur
+    body:
+      encoding: UTF-8
+      string: '{"regions":[]}'
+    http_version: 
+  recorded_at: Sun, 15 Jan 2017 17:25:09 GMT
+recorded_with: VCR 3.0.3

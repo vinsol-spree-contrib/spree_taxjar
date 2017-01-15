@@ -1,5 +1,6 @@
 module Spree
   class Taxjar
+    attr_reader :client, :order, :reimbursement, :shipment
 
     def initialize(order = nil, reimbursement = nil, shipment = nil)
       @order = order
@@ -44,10 +45,6 @@ module Spree
       end
     end
 
-    def nexus_states(nexus_regions)
-      nexus_regions.map { |record| record.region_code}
-    end
-
     def calculate_tax_for_order
       SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}}) if SpreeTaxjar::Logger.logger_enabled?
       if has_nexus?
@@ -62,6 +59,10 @@ module Spree
     end
 
     private
+
+      def nexus_states(nexus_regions)
+        nexus_regions.map { |record| record.region_code}
+      end
 
       def tax_address_country_iso
         tax_address.country.iso
