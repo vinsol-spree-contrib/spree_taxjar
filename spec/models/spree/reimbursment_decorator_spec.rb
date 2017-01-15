@@ -19,16 +19,33 @@ describe Spree::Reimbursement do
         end
       end
       context 'when taxjar_applicable? return true' do
-        before do
-          @order = reimbursement.order
-          allow(reimbursement).to receive(:taxjar_applicable?).with(@order).and_return(true)
-          allow(Spree::Taxjar).to receive(:new).with(@order, reimbursement).and_return(client)
-          allow(client).to receive(:create_refund_transaction_for_order)
+        context 'when taxjar calculation disabled' do
+          before :each do
+            Spree::Config[:taxjar_enabled] = false
+          end
+
+          it 'tax should be zero' do
+            expect(reimbursement).to_not receive(:taxjar_applicable?)
+          end
+
+          after { reimbursement.remove_tax_for_returned_items }
         end
-        it 'should remive tax for reimbursed items' do
-          expect(client).to receive(:create_refund_transaction_for_order)
+
+        context 'when taxjar calculation enabled' do
+          before do
+            Spree::Config[:taxjar_enabled] = true
+            @order = reimbursement.order
+            allow(reimbursement).to receive(:taxjar_applicable?).with(@order).and_return(true)
+            allow(Spree::Taxjar).to receive(:new).with(@order, reimbursement).and_return(client)
+            allow(client).to receive(:create_refund_transaction_for_order)
+          end
+
+          it 'should remive tax for reimbursed items' do
+            expect(client).to receive(:create_refund_transaction_for_order)
+          end
+
+          after { reimbursement.remove_tax_for_returned_items }
         end
-        after { reimbursement.send(:remove_tax_for_returned_items) }
       end
     end
 
