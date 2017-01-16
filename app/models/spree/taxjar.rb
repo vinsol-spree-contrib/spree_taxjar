@@ -11,16 +11,34 @@ module Spree
 
     def create_refund_transaction_for_order
       if has_nexus? && !reimbursement_present?
-        @client.create_refund(refund_params)
+        api_params = refund_params
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, reimbursement: {id: @reimbursement.id, number: @reimbursement.number}, api_params: api_params}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response = @client.create_refund(api_params)
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, reimbursement: {id: @reimbursement.id, number: @reimbursement.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response
       end
     end
 
     def create_transaction_for_order
-      @client.create_order(transaction_parameters) if has_nexus?
+      SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}}) if SpreeTaxjar::Logger.logger_enabled?
+      if has_nexus?
+        api_params = transaction_parameters
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_params: api_params}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response = @client.create_order(api_params)
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response
+      end
     end
 
     def delete_transaction_for_order
-      @client.delete_order(@order.number) if has_nexus?
+      SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}}) if SpreeTaxjar::Logger.logger_enabled?
+      if has_nexus?
+        api_response = @client.delete_order(@order.number)
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response
+      end
+    rescue ::Taxjar::Error::NotFound => e
+      SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, error_msg: e.message}) if SpreeTaxjar::Logger.logger_enabled?
     end
 
     def calculate_tax_for_shipment
@@ -38,6 +56,11 @@ module Spree
 
     def has_nexus?
       nexus_regions = @client.nexus_regions
+      SpreeTaxjar::Logger.log(__method__, {
+        order: {id: @order.id, number: @order.number},
+        nexus_regions: nexus_regions,
+        address: {state: tax_address_state_abbr, city: tax_address_city, zip: tax_address_zip}
+      }) if SpreeTaxjar::Logger.logger_enabled?
       if nexus_regions.present?
         nexus_states(nexus_regions).include?(tax_address_state_abbr)
       else
