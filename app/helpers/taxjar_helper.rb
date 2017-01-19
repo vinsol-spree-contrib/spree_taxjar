@@ -11,16 +11,13 @@ module TaxjarHelper
   end
 
   class TaxjarLog
-    def initialize(path_name, file_name, log_info = nil, schedule = nil)
-      schedule = "weekly" unless schedule != nil
+    attr_reader :logger
+
+    def initialize(path_name, file_name, log_info = nil, schedule = "weekly")
       @logger ||= Logger.new("#{Rails.root}/log/#{path_name}.log", schedule)
       @logger.formatter = Pretty.new
       progname(file_name.split("/").last.chomp(".rb"))
       info(log_info) unless log_info.nil?
-    end
-
-    def logger
-      @logger
     end
 
     def logger_enabled?
