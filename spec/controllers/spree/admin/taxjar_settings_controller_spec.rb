@@ -21,7 +21,7 @@ describe Spree::Admin::TaxjarSettingsController, type: :controller do
     end
 
     it "assigns @preferences_api" do
-      expect(assigns[:preferences_api]).to eq([:taxjar_api_key])
+      expect(assigns[:preferences_api]).to eq([:taxjar_api_key, :taxjar_enabled, :taxjar_debug_enabled])
     end
 
     it "renders edit template" do
@@ -33,7 +33,7 @@ describe Spree::Admin::TaxjarSettingsController, type: :controller do
   describe "PUT 'update'" do
 
     def send_request
-      put :update, taxjar_api_key: 'SAMPLE_API_KEY'
+      put :update, taxjar_api_key: 'SAMPLE_API_KEY', taxjar_enabled: '1', taxjar_debug_enabled: '1'
     end
 
     before do
@@ -44,8 +44,16 @@ describe Spree::Admin::TaxjarSettingsController, type: :controller do
       expect(Spree::Config[:taxjar_api_key]).to eq 'SAMPLE_API_KEY'
     end
 
+    it "saves taxjar_enabled with passed parameter" do
+      expect(Spree::Config[:taxjar_enabled]).to be(true)
+    end
+
+    it "saves taxjar_debug_enabled with passed parameter" do
+      expect(Spree::Config[:taxjar_debug_enabled]).to be(true)
+    end
+
     it "sets flash message to success" do
-      expect(flash[:success]).to eq Spree.t(:api_key_updated)
+      expect(flash[:success]).to eq Spree.t(:taxjar_settings_updated)
     end
 
     it "renders edit template" do

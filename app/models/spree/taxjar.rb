@@ -1,51 +1,118 @@
 module Spree
   class Taxjar
+    attr_reader :client, :order, :reimbursement, :shipment
 
-    def initialize(order = nil, reimbursement = nil)
+    def initialize(order = nil, reimbursement = nil, shipment = nil)
       @order = order
+      @shipment = shipment
       @reimbursement = reimbursement
       @client = ::Taxjar::Client.new(api_key: Spree::Config[:taxjar_api_key])
     end
 
     def create_refund_transaction_for_order
       if has_nexus? && !reimbursement_present?
-        @client.create_refund(refund_params)
+        api_params = refund_params
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, reimbursement: {id: @reimbursement.id, number: @reimbursement.number}, api_params: api_params}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response = @client.create_refund(api_params)
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, reimbursement: {id: @reimbursement.id, number: @reimbursement.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response
       end
     end
 
     def create_transaction_for_order
-      @client.create_order(transaction_parameters) if has_nexus?
+      SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}}) if SpreeTaxjar::Logger.logger_enabled?
+      if has_nexus?
+        api_params = transaction_parameters
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_params: api_params}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response = @client.create_order(api_params)
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response
+      end
     end
 
     def delete_transaction_for_order
-      @client.delete_order(@order.number) if has_nexus?
+      SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}}) if SpreeTaxjar::Logger.logger_enabled?
+      if has_nexus?
+        api_response = @client.delete_order(@order.number)
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response
+      end
+    rescue ::Taxjar::Error::NotFound => e
+      SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, error_msg: e.message}) if SpreeTaxjar::Logger.logger_enabled?
+    end
+
+    def calculate_tax_for_shipment
+      SpreeTaxjar::Logger.log(__method__, {shipment: {order: {id: @shipment.order.id, number: @shipment.order.number}}}) if SpreeTaxjar::Logger.logger_enabled?
+      if has_nexus?
+        api_params = shipment_tax_params
+        SpreeTaxjar::Logger.log(__method__, {shipment: {order: {id: @shipment.order.id, number: @shipment.order.number}, api_params: api_params}}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response = @client.tax_for_order(api_params)
+        SpreeTaxjar::Logger.log(__method__, {shipment: {order: {id: @shipment.order.id, number: @shipment.order.number}, api_response: api_response}}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response.amount_to_collect
+      else
+        0
+      end
     end
 
     def has_nexus?
-      nexus_regions = @client.nexuses
+      nexus_regions = @client.nexus_regions
+      SpreeTaxjar::Logger.log(__method__, {
+        order: {id: @order.id, number: @order.number},
+        nexus_regions: nexus_regions,
+        address: {state: tax_address_state_abbr, city: tax_address_city, zip: tax_address_zip}
+      }) if SpreeTaxjar::Logger.logger_enabled?
       if nexus_regions.present?
-        nexus_states(nexus_regions).include?(@order.ship_address.state.abbr)
+        nexus_states(nexus_regions).include?(tax_address_state_abbr)
       else
         false
       end
     end
 
-    def nexus_states(nexus_regions)
-      nexus_regions.map { |record| record[:region_code]}
-    end
-
     def calculate_tax_for_order
-      @client.tax_for_order(tax_params) if has_nexus?
+      SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}}) if SpreeTaxjar::Logger.logger_enabled?
+      if has_nexus?
+        api_params = tax_params
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_params: api_params}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response = @client.tax_for_order(api_params)
+        SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
+        api_response
+      else
+        0
+      end
     end
 
     private
 
+      def nexus_states(nexus_regions)
+        nexus_regions.map { |record| record.region_code}
+      end
+
+      def tax_address_country_iso
+        tax_address.country.iso
+      end
+
+      def tax_address_state_abbr
+        tax_address.state.abbr
+      end
+
+      def tax_address_city
+        tax_address.city
+      end
+
+      def tax_address_zip
+        tax_address.zipcode
+      end
+
+      def tax_address
+        @order.tax_address
+      end
+
       def tax_params
         {
           amount: @order.item_total,
-          shipping: 0,
-          to_state: @order.ship_address.state.abbr,
-          to_zip: @order.ship_address.zipcode,
+          shipping: @order.shipment_total,
+          to_state: tax_address_state_abbr,
+          to_zip: tax_address_zip,
           line_items: taxable_line_items_params
         }
       end
@@ -55,7 +122,9 @@ module Spree
           {
             id: item.id,
             quantity: item.quantity,
-            unit_price: item.price
+            unit_price: item.price,
+            discount: item.promo_total,
+            product_tax_code: item.tax_category.try(:tax_code)
           }
         end
       end
@@ -75,7 +144,8 @@ module Spree
             quantity: return_items.length,
             product_identifier: item.variant.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.variant.description).truncate(150),
-            unit_price: item.pre_tax_amount
+            unit_price: item.pre_tax_amount,
+            product_tax_code: item.variant.tax_category.try(:tax_code)
           }
         end
       end
@@ -85,8 +155,8 @@ module Spree
           transaction_id: @reimbursement.number,
           transaction_reference_id: @order.number,
           transaction_date: @order.completed_at.as_json,
-          amount: @reimbursement.return_items.sum(:pre_tax_amount) + @order.shipment_total,
-          shipping: @order.shipment_total + @order.adjustment_total - @order.additional_tax_total,
+          amount: @reimbursement.return_items.sum(:pre_tax_amount),
+          shipping: 0,
           sales_tax: @reimbursement.return_items.sum(:additional_tax_total),
           line_items: return_items_params
         })
@@ -96,8 +166,8 @@ module Spree
         address_params.merge({
           transaction_id: @order.number,
           transaction_date: @order.completed_at.as_json,
-          amount: @order.total - @order.additional_tax_total,
-          shipping: @order.shipment_total + @order.adjustment_total - @order.additional_tax_total,
+          amount: @order.item_total + @order.shipment_total,
+          shipping: @order.shipment_total,
           sales_tax: @order.additional_tax_total,
           line_items: line_item_params
         })
@@ -105,11 +175,18 @@ module Spree
 
       def address_params
         {
-          to_country: @order.ship_country.iso,
-          to_zip: @order.ship_zipcode,
-          to_state: @order.ship_state.abbr,
-          to_city: @order.ship_city
+          to_country: tax_address_country_iso,
+          to_zip: tax_address_zip,
+          to_state: tax_address_state_abbr,
+          to_city: tax_address_city
         }
+      end
+
+      def shipment_tax_params
+        address_params.merge({
+          amount: 0,
+          shipping: @shipment.cost
+        })
       end
 
       def line_item_params
@@ -119,7 +196,9 @@ module Spree
             product_identifier: item.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.description).try(:truncate, 150),
             unit_price: item.price,
-            sales_tax: item.additional_tax_total
+            sales_tax: item.additional_tax_total,
+            discount: item.promo_total,
+            product_tax_code: item.tax_category.try(:tax_code)
           }
         end
       end
