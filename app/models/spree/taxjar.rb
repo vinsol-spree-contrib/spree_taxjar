@@ -10,7 +10,7 @@ module Spree
     end
 
     def create_refund_transaction_for_order
-      if has_nexus? && !reimbursement_present?
+      if has_nexus?
         api_params = refund_params
         SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, reimbursement: {id: @reimbursement.id, number: @reimbursement.number}, api_params: api_params}) if SpreeTaxjar::Logger.logger_enabled?
         api_response = @client.create_refund(api_params)
@@ -127,10 +127,6 @@ module Spree
             product_tax_code: item.tax_category.try(:tax_code)
           }
         end
-      end
-
-      def reimbursement_present?
-        @client.list_refunds(from_transaction_date: Date.today - 1, to_transaction_date: Date.today + 1).include?(@reimbursement.number)
       end
 
       def group_by_line_items
