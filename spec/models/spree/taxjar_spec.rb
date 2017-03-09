@@ -135,7 +135,7 @@ describe Spree::Taxjar do
           allow(spree_taxjar).to receive(:has_nexus?).and_return(false)
         end
         it 'should return nil' do
-          expect(spree_taxjar.calculate_tax_for_order).to eq 0
+          expect(spree_taxjar.calculate_tax_for_order).to eq nil
         end
       end
 
