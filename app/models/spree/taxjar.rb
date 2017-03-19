@@ -76,8 +76,6 @@ module Spree
         api_response = @client.tax_for_order(api_params)
         SpreeTaxjar::Logger.log(__method__, {order: {id: @order.id, number: @order.number}, api_response: api_response}) if SpreeTaxjar::Logger.logger_enabled?
         api_response
-      else
-        0
       end
     end
 
