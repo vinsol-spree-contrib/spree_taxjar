@@ -33,7 +33,7 @@ describe Spree::Admin::TaxjarSettingsController, type: :controller do
   describe "PUT 'update'" do
 
     def send_request
-      put :update, taxjar_api_key: 'SAMPLE_API_KEY', taxjar_enabled: '1', taxjar_debug_enabled: '1'
+      put :update, params: {taxjar_api_key: 'SAMPLE_API_KEY', taxjar_enabled: '1', taxjar_debug_enabled: '1' }
     end
 
     before do
