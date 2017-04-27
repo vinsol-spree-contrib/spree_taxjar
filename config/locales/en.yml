@@ -1,9 +1,9 @@
 en:
   spree:
-    taxjar_settings_updated: Taxjar Settings successfully updated
+    taxjar_settings_updated: TaxJar Settings successfully updated
     shipping_rate_exception_message: TaxJar cannot calculate inclusive sales taxes.
-    taxjar_api_key: Taxjar API Key
-    taxjar_enabled: Enable Taxjar Calculation
-    taxjar_debug_enabled: Enable Taxjar Debug Logging
-    taxjar_calculator_description: Taxjar Calculator
-    taxjar_settings: Taxjar Settings
+    taxjar_api_key: TaxJar API Token
+    taxjar_enabled: Enable TaxJar Calculation
+    taxjar_debug_enabled: Enable TaxJar Debug Logging
+    taxjar_calculator_description: TaxJar Calculator
+    taxjar_settings: TaxJar Settings
