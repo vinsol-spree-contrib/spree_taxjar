@@ -1,15 +1,15 @@
 SpreeTaxjar
 ===========
 
-Spree::Taxjar is a Sales Tax extension for Spree using the [Taxjar Service](https://developers.taxjar.com/api/reference/).
+Spree::Taxjar is a sales tax extension for Spree using [SmartCalcs by TaxJar](https://developers.taxjar.com/api/reference/).
 
-## Prerequisite
+## Prerequisites
 
-- Create an account with [Taxjar](http://www.taxjar.com/)
-- Go to Your `Account >> SmartCalcs Api` Setting and Get an API Key
-    - API key is needed to calculate sales tax from Taxjar over API
-- Go to Your `Account >> States` Setting, and create [Nexus](http://blog.taxjar.com/sales-tax-nexus-definition/) for the relevant states in which you want/need to collect sales tax.
-    - **NOTE:** Taxjar returns ZERO sales tax by default for orders shipping to the states which are not registered as Nexuses.
+- Create a new account with [TaxJar](http://www.taxjar.com/)
+- Go to `Account >> SmartCalcs API` to generate an API token
+    - API token is needed to calculate sales tax from TaxJar over API
+- Go to `Account >> State Settings` and click the [Add State with Nexus](http://blog.taxjar.com/sales-tax-nexus-definition/) button for each state where want/need to collect sales tax.
+    - **NOTE:** TaxJar returns ZERO sales tax by default for orders shipping to states which are not designated as a nexus state.
 
 ## Installation
 
@@ -37,30 +37,29 @@ Spree::Taxjar is a Sales Tax extension for Spree using the [Taxjar Service](http
 
   If your server was running, restart it so that it can find the assets properly.
 
-5. Go to Admin >> Configurations >> Taxjar Settings
-  - Add your taxjar api_key.
-  - Check `TAXJAR ENABLED`
-  - You can optionally also check `TAXJAR DEBUG ENABLED` but its not recommended for production unless need help debugging production issue.
+5. Go to Admin >> Configurations >> TaxJar Settings
+  - Add your TaxJar API Token
+  - Check the `TAXJAR ENABLED` checkbox
+  - Optionally, check `TAXJAR DEBUG ENABLED` for debugging issues
+    - Not recommended for production use unless debugging production issues
 
 ## Developing / Debugging Extension
 
 - Ensure `Spree::Config[:taxjar_enabled]` is set as expected (true/false)
 - Set `Spree::Config[:taxjar_debug_enabled]` as true
-    - It starts logging the interactions in `spec/dummy/log/spree_taxjar.log` if    using tests
+    - It starts logging the interactions in `spec/dummy/log/spree_taxjar.log` if using tests
     - Check the logs in your Rails application AT `log/spree_taxjar.log` where you have installed the spree_taxjar extension
     - The same logs are also added to Rails log file like `log/development.log` (works for all environments)
-- As most of the API interactions are recorded and stored in vcr cassettes AT `spec/fixtures/vcr_cassettes`
+- As most of the API interactions are recorded and stored in VCR cassettes AT `spec/fixtures/vcr_cassettes`
     - Start with getting familiar with request and response expected
     - Feel free to delete the cassettes to debug your live use-case by setting `Spree::Config[:taxjar_api_key]` as your api_key and inspect results
 
-## API cost and implication to Taxjar Billing Plan
+## TaxJar API Usage and Billing
 
 - We have chosen accuracy over price for obvious reasons (high fine by states if sales tax compliance breach is found)
 - Minimum of N + 1 tax calculation API calls are made for each order with N shipments
 
-### Why
-
-Taxjar provides 2 set of API tiers (Standard and Advanced) but shipping in both cases is sent as single unit which makes Sales Tax calculation for different shipments a bit tricky or hacky
+TaxJar provides 2 set of API tiers (Standard and Advanced) but shipping in both cases is sent as single unit which makes Sales Tax calculation for different shipments a bit tricky or hacky.
 
 - We chose to use both API methods at our advantage
 - For line\_items sales tax, Advanced Tier API call is made to take advantage of in-built product_tax_code and discount fields and all line_items are grouped and sent in same API call
@@ -76,16 +75,15 @@ bundle
 bundle exec rake
 ```
 
-Credits
--------
+## Credits
 
 [![vinsol.com: Ruby on Rails, iOS and Android developers](http://vinsol.com/vin_logo.png "Ruby on Rails, iOS and Android developers")](http://vinsol.com)
 
 Copyright (c) 2016 [vinsol.com](http://vinsol.com "Ruby on Rails, iOS and Android developers"), released under the New MIT License
 
-#Note
+## Note
 
-For better handling of exception raised by taxjar due to various validations add following code in your project's application_controller.rb
+For better handling of exceptions raised by TaxJar due to various validations add the following code to your project's `application_controller.rb`:
 
     rescue_from Taxjar::Error, with: :taxjar_rollback
 
