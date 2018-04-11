@@ -102,9 +102,11 @@ module Spree
       end
 
       def tax_params
+        shipment_adjustment = @order.shipment_adjustments.where.not(source_type: "Spree::TaxRate")
+        shipment_adjustment_amount = shipment_adjustment.count > 0 ? shipment_adjustment.sum(&:amount) : 0
         {
           amount: @order.item_total,
-          shipping: @order.shipment_total + @order.shipment_adjustments.where.not(source_type: "Spree::TaxRate").sum(&:amount),
+          shipping: @order.shipment_total + shipment_adjustment_amount,
           to_state: tax_address_state_abbr,
           to_zip: tax_address_zip,
           line_items: taxable_line_items_params
@@ -156,11 +158,13 @@ module Spree
       end
 
       def transaction_parameters
+        shipment_adjustment = @order.shipment_adjustments.where.not(source_type: "Spree::TaxRate")
+        shipment_adjustment_amount = shipment_adjustment.count > 0 ? shipment_adjustment.sum(&:amount) : 0
         address_params.merge({
           transaction_id: @order.number,
           transaction_date: @order.completed_at.as_json,
           amount: @order.total - @order.tax_total,
-          shipping: @order.shipment_total + @order.shipment_adjustments.where.not(source_type: "Spree::TaxRate").sum(&:amount),
+          shipping: @order.shipment_total + shipment_adjustment_amount,
           sales_tax: @order.additional_tax_total,
           line_items: line_item_params
         })
