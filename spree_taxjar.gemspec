@@ -14,7 +14,9 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.requirements << 'none'
 
-  s.add_dependency('spree_core', '~> 3.2.0')
+  spree_version = '>= 3.2.0', '< 4.0.0'
+
+  s.add_dependency 'spree_core', spree_version
   s.add_dependency 'taxjar-ruby', '~> 1.5'
 
   s.add_development_dependency 'capybara', '~> 2.6'
@@ -31,4 +33,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-activemodel-mocks'
   s.add_development_dependency 'vcr'
   s.add_development_dependency 'webmock'
+  s.add_development_dependency 'appraisal'
 end
