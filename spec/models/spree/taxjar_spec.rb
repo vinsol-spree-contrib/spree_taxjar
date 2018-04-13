@@ -77,56 +77,28 @@ describe Spree::Taxjar do
     end
 
     describe '#create_transaction_for_order' do
-      context 'when has_nexus? returns false' do
-        before do
-          allow(spree_taxjar).to receive(:has_nexus?).and_return(false)
-        end
-        it 'should return nil' do
-          expect(spree_taxjar.create_transaction_for_order).to eq nil
-        end
+      before do
+        allow(::Taxjar::Client).to receive(:new).with(api_key: Spree::Config[:taxjar_api_key]).and_return(client)
+        allow(client).to receive(:create_order).and_return(true)
       end
 
-      context 'when has_nexus? returns true' do
-        before do
-          allow(::Taxjar::Client).to receive(:new).with(api_key: Spree::Config[:taxjar_api_key]).and_return(client)
-          allow(spree_taxjar).to receive(:has_nexus?).and_return(true)
-          allow(client).to receive(:create_order).and_return(true)
-        end
-
-        it 'should return create order for the transaction' do
-          expect(client).to receive(:create_order).and_return(true)
-        end
-
-        after { spree_taxjar.create_transaction_for_order }
-
+      it 'should return create order for the transaction' do
+        expect(client).to receive(:create_order).and_return(true)
       end
+
+      after { spree_taxjar.create_transaction_for_order }
     end
 
     describe '#delete_transaction_for_order' do
-      context 'when has_nexus? returns false' do
-        before do
-          allow(spree_taxjar).to receive(:has_nexus?).and_return(false)
-        end
-        it 'should return nil' do
-          expect(spree_taxjar.delete_transaction_for_order).to eq nil
-        end
+      before do
+        @transaction_parameters = {}
+        allow(client).to receive(:delete_order).with(order.number).and_return(true)
       end
 
-      context 'when has_nexus? returns true' do
-        before do
-          @transaction_parameters = {}
-          allow(spree_taxjar).to receive(:has_nexus?).and_return(true)
-          allow(client).to receive(:delete_order).with(order.number).and_return(true)
-        end
-
-        it { expect(spree_taxjar).to receive(:has_nexus?).and_return(true) }
-
-        it 'should return create order for the transaction' do
-          expect(client).to receive(:delete_order).with(order.number).and_return(true)
-        end
-        after { spree_taxjar.delete_transaction_for_order }
-
+      it 'should return create order for the transaction' do
+        expect(client).to receive(:delete_order).with(order.number).and_return(true)
       end
+      after { spree_taxjar.delete_transaction_for_order }
     end
 
     describe '#calculate_tax_for_order' do
@@ -164,18 +136,9 @@ describe Spree::Taxjar do
     end
 
     describe '#create_refund_transaction_for_order' do
-      context 'when has_nexus? returns false' do
-        before do
-          allow(spree_taxjar).to receive(:has_nexus?).and_return(false)
-        end
-        it 'should return nil' do
-          expect(spree_taxjar.create_refund_transaction_for_order).to eq nil
-        end
-      end
 
       context 'when reimbursement is present' do
         before do
-          allow(spree_taxjar).to receive(:has_nexus?).and_return(true)
           allow(spree_taxjar).to receive(:reimbursement_present?).and_return(true)
         end
         it 'should return nil' do
@@ -183,9 +146,8 @@ describe Spree::Taxjar do
         end
       end
 
-      context 'when has_nexus? returns true & reimbursement is not present' do
+      context 'reimbursement is not present' do
         before do
-          allow(spree_taxjar).to receive(:has_nexus?).and_return(true)
           allow(spree_taxjar).to receive(:reimbursement_present?).and_return(false)
           allow(client).to receive(:create_refund).with(:refund_params).and_return(true)
         end
@@ -194,11 +156,8 @@ describe Spree::Taxjar do
           expect(client).to receive(:create_refund).and_return(true)
         end
         after { spree_taxjar.create_refund_transaction_for_order }
-
       end
-
     end
-
   end
 
 end
