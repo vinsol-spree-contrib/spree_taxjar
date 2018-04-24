@@ -83,7 +83,7 @@ module Spree
         ## better to use Rails.cache.fetch for order and wrapping lookup based on line_item id
         res = nil
         taxjar_response.breakdown.line_items.each do |line_item|
-          item_from_db = Spree::LineItem.find_by(id: line_item.id)
+          item_from_db = Spree::LineItem.includes(:adjustments).find_by(id: line_item.id)
           if item && item_from_db.id == item.id
             res = line_item.tax_collectable
           end
@@ -94,9 +94,9 @@ module Spree
 
       def cache_key(order, item, address)
         if item.is_a?(Spree::LineItem)
-          ['Spree::LineItem', order.id, item.id, address.state.id, address.zipcode, item.amount, :amount_to_collect]
+          [Spree::LineItem.to_s, order.id, item.id, address.state_id, address.zipcode, item.taxable_amount, :amount_to_collect]
         else
-          ['Spree::Shipment', order.id, item.id, address.state.id, address.zipcode, item.cost, :amount_to_collect]
+          [Spree::Shipment.to_s, order.id, item.id, address.state_id, address.zipcode, item.cost, item.adjustments.select { |adjustment| adjustment.source_type != Spree::TaxRate.to_s }.map(&:amount).sum.to_f, :amount_to_collect]
         end
       end
   end
