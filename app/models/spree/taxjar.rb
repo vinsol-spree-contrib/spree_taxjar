@@ -108,7 +108,7 @@ module Spree
       def tax_params
         {
           amount: @order.item_total,
-          shipping: @order.shipment_total + @order.shipment_adjustments.select { |adjustment| adjustment.source_type != Spree::TaxRate.to_s }.map(&:amount).sum.to_f,
+          shipping: @order.shipment_total + adjustments_total(@order.shipment_adjustments),
           to_state: tax_address_state_abbr,
           to_zip: tax_address_zip,
           line_items: taxable_line_items_params
@@ -164,7 +164,7 @@ module Spree
           transaction_id: @order.number,
           transaction_date: @order.completed_at.as_json,
           amount: @order.total - @order.tax_total,
-          shipping: @order.shipment_total + @order.shipment_adjustments.select { |adjustment| adjustment.source_type != Spree::TaxRate.to_s }.map(&:amount).sum.to_f,
+          shipping: @order.shipment_total + adjustments_total(@order.shipment_adjustments),
           sales_tax: @order.additional_tax_total,
           line_items: line_item_params
         })
@@ -182,7 +182,7 @@ module Spree
       def shipment_tax_params
         address_params.merge({
           amount: 0,
-          shipping: @shipment.cost + @shipment.adjustments.select { |adjustment| adjustment.source_type != Spree::TaxRate.to_s }.map(&:amount).sum.to_f
+          shipping: @shipment.cost + adjustments_total(@shipment.adjustments)
         })
       end
 
@@ -206,6 +206,11 @@ module Spree
         weightage = @order.adjustments.sum(:amount) / (@order.item_total)
         - weightage * unit_price
       end
+
+      def adjustments_total(adjustments)
+        adjustments.select { |adjustment| adjustment.source_type != Spree::TaxRate.to_s }.map(&:amount).sum.to_f
+      end
+
 
   end
 end
