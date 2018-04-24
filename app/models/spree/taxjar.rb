@@ -108,7 +108,7 @@ module Spree
       def tax_params
         {
           amount: @order.item_total,
-          shipping: @order.shipment_total + @order.shipment_adjustments.where.not(source_type: "Spree::TaxRate").sum(&:amount),
+          shipping: @order.shipment_total + @order.shipment_adjustments.select { |adjustment| adjustment.source_type != Spree::TaxRate.to_s }.map(&:amount).sum.to_f,
           to_state: tax_address_state_abbr,
           to_zip: tax_address_zip,
           line_items: taxable_line_items_params
@@ -164,7 +164,7 @@ module Spree
           transaction_id: @order.number,
           transaction_date: @order.completed_at.as_json,
           amount: @order.total - @order.tax_total,
-          shipping: @order.shipment_total + @order.shipment_adjustments.where.not(source_type: "Spree::TaxRate").sum(&:amount),
+          shipping: @order.shipment_total + @order.shipment_adjustments.select { |adjustment| adjustment.source_type != Spree::TaxRate.to_s }.map(&:amount).sum.to_f,
           sales_tax: @order.additional_tax_total,
           line_items: line_item_params
         })
@@ -182,28 +182,29 @@ module Spree
       def shipment_tax_params
         address_params.merge({
           amount: 0,
-          shipping: @shipment.cost + @shipment.adjustments.where.not(source_type: "Spree::TaxRate").sum(&:amount).to_f
+          shipping: @shipment.cost + @shipment.adjustments.select { |adjustment| adjustment.source_type != Spree::TaxRate.to_s }.map(&:amount).sum.to_f
         })
       end
 
       def line_item_params
         @order.line_items.map do |item|
+          unit_price = item.taxable_amount / item.quantity
           {
             quantity: item.quantity,
             product_identifier: item.sku,
             description: ActionView::Base.full_sanitizer.sanitize(item.description).try(:truncate, 150),
-            unit_price: item.taxable_amount / item.quantity,
+            unit_price: unit_price,
             sales_tax: item.additional_tax_total,
-            discount: discount_weightage(item),
+            discount: discount_weightage(item, unit_price),
             product_tax_code: item.tax_category.try(:tax_code)
           }
         end
       end
 
-      def discount_weightage(item)
+      def discount_weightage(item, unit_price)
         return 0 if @order.item_total.zero?
         weightage = @order.adjustments.sum(:amount) / (@order.item_total)
-        - weightage * (item.taxable_amount / item.quantity)
+        - weightage * unit_price
       end
 
   end
