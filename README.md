@@ -18,7 +18,7 @@ Spree::Taxjar is a Sales Tax extension for Spree using the [Taxjar Service](http
   ```ruby
   gem 'spree_taxjar', github: 'vinsol-spree-contrib/spree_taxjar', branch: <spree-version-compatible>
   ```
-  
+
   *The `branch` option is important:* it must match the version of Spree you're using. For example, use `3-1-stable` if you're using Spree `3-1-stable` or any `3.1.x` version.
 
 2. Install the gem using Bundler:
@@ -41,6 +41,7 @@ Spree::Taxjar is a Sales Tax extension for Spree using the [Taxjar Service](http
   - Add your taxjar api_key.
   - Check `TAXJAR ENABLED`
   - You can optionally also check `TAXJAR DEBUG ENABLED` but its not recommended for production unless need help debugging production issue.
+  - Update tax rates to Spree/Taxjar calculator.
 
 ## Developing / Debugging Extension
 
