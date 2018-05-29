@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   spree_version = '>= 3.2.0', '< 4.0.0'
 
   s.add_dependency 'spree_core', spree_version
-  s.add_dependency 'taxjar-ruby', '~> 1.5'
+  s.add_dependency 'taxjar-ruby', '~> 2.0.0'
 
   s.add_development_dependency 'capybara', '~> 2.6'
   s.add_development_dependency 'coffee-rails', '~> 4.2.1'
