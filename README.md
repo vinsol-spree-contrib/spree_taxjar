@@ -32,10 +32,10 @@ Try Spree Taxjar for Spree 3-1 with direct deployment on Heroku:
 1. Add this extension to your Gemfile with this line:
 
   ```ruby
-  gem 'spree_taxjar', github: 'vinsol-spree-contrib/spree_taxjar', branch: <spree-version-compatible>
+  gem 'spree_taxjar', github: 'vinsol-spree-contrib/spree_taxjar'
   ```
 
-  *The `branch` option is important:* it must match the version of Spree you're using. For example, use `3-1-stable` if you're using Spree `3-1-stable` or any `3.1.x` version.
+  **Note** For spree 3-1 use `3-1-stable` branch. For spree version > 3-1 use `master` branch.
 
 2. Install the gem using Bundler:
 
