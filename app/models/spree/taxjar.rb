@@ -195,16 +195,16 @@ module Spree
             description: ActionView::Base.full_sanitizer.sanitize(item.description).try(:truncate, 150),
             unit_price: unit_price,
             sales_tax: item.additional_tax_total,
-            discount: discount_weightage(item, unit_price),
+            discount: discount_weightage(item, unit_price, item.quantity),
             product_tax_code: item.tax_category.try(:tax_code)
           }
         end
       end
 
-      def discount_weightage(item, unit_price)
+      def discount_weightage(item, unit_price, quantity)
         return 0 if @order.item_total.zero?
         weightage = @order.adjustments.sum(:amount) / (@order.item_total)
-        - weightage * unit_price
+        - weightage * unit_price * quantity
       end
 
       def adjustments_total(adjustments)
