@@ -92,6 +92,11 @@ bundle
 bundle exec rake
 ```
 
+## See It In Action
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=xh__bVxTw3Q
+" target="_blank"><img src="http://img.youtube.com/vi/xh__bVxTw3Q/0.jpg" 
+alt="Youtube Video Tutorial" /></a>
+
 ## Credits
 
 [![vinsol.com: Ruby on Rails, iOS and Android developers](http://vinsol.com/vin_logo.png "Ruby on Rails, iOS and Android developers")](http://vinsol.com)
