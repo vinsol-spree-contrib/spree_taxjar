@@ -23,6 +23,10 @@ module SpreeTaxjar
       app.config.spree.calculators.tax_rates << Spree::Calculator::TaxjarCalculator
     end
 
+    initializer "spree_taxjar.preferences", before: :load_config_initializers do
+      SpreeTaxjar::Config = Spree::SpreeTaxjarSetting.new
+    end
+
     config.to_prepare &method(:activate).to_proc
   end
 end

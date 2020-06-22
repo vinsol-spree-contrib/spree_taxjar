@@ -16,7 +16,7 @@ module Spree
 
     def compute_line_item(item)
       SpreeTaxjar::Logger.log(__method__, {line_item: {order: {id: item.order.id, number: item.order.number}}}) if SpreeTaxjar::Logger.logger_enabled?
-      return 0 unless Spree::Config[:taxjar_enabled]
+      return 0 unless SpreeTaxjar::Config[:taxjar_enabled]
       if rate.included_in_price
         0
       else
@@ -26,12 +26,12 @@ module Spree
 
     def compute_shipment(shipment)
       SpreeTaxjar::Logger.log(__method__, {shipment: {order: {id: shipment.order.id, number: shipment.order.number}}}) if SpreeTaxjar::Logger.logger_enabled?
-      return 0 unless Spree::Config[:taxjar_enabled]
+      return 0 unless SpreeTaxjar::Config[:taxjar_enabled]
       tax_for_shipment(shipment)
     end
 
     def compute_shipping_rate(shipping_rate)
-      return 0 unless Spree::Config[:taxjar_enabled]
+      return 0 unless SpreeTaxjar::Config[:taxjar_enabled]
       if rate.included_in_price
         raise Spree.t(:shipping_rate_exception_message)
       else

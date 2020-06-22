@@ -9,10 +9,11 @@
     <div class="row">
       <div class="col-md-6">
         <fieldset class="no-border-bottom">
+          <% debugger %>
           <% @preferences_api.each do |key| %>
               <div class="form-group">
                 <%= label_tag key %>
-                <%= preference_field_tag(key, Spree::Config[key], type: Spree::Config.preference_type(key)) %>
+                <%= preference_field_tag(key, SpreeTaxjar::Config[key], type: SpreeTaxjar::Config.preference_type(key)) %>
               </div>
           <% end %>
         </fieldset>
